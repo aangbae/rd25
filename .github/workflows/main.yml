@@ -8,8 +8,8 @@ jobs:
     runs-on: windows-latest
 
     steps:
-      - name: Download
-        run: Invoke-WebRequest https://bin.equinox.io/c/bnyJimQWY4C/ngrok-v3-stable-windows-amd64.zip -Outfile ngrok.zip
+     - name: Download
+  run: Invoke-WebRequest https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-windows-amd64.zip -Outfile ngrok.zip
 
       - name: Extract
         run: Expand-Archive ngrok.zip
