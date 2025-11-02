@@ -9,24 +9,34 @@ jobs:
 
     steps:
       - name: Download
-        run: Invoke-WebRequest https://bin.equinox.io/c/bnyJimQWY4C/ngrok-v3-stable-windows-amd64.zip -Outfile ngrok.zip
+        # FIX 1: Menggunakan URL ngrok yang benar
+        run: Invoke-WebRequest https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-windows-amd64.zip -Outfile ngrok.zip
 
       - name: Extract
-        run: Expand-Archive ngrok.zip
+        # Menambahkan -DestinationPath . agar jelas
+        run: Expand-Archive -Path ngrok.zip -DestinationPath .
 
       - name: Auth
-        run: .\ngrok\ngrok.exe authtoken $Env:NGROK_AUTH_TOKEN
+        # FIX 2: Path yang benar adalah .\ngrok.exe
+        run: .\ngrok.exe authtoken $Env:NGROK_AUTH_TOKEN
         env:
           NGROK_AUTH_TOKEN: ${{ secrets.NGROK_AUTH_TOKEN }}
 
-      - name: Enable TS
+      - name: Enable RDP
         run: Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -name "fDenyTSConnections" -Value 0
 
-      - run: Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
+      - name: Enable RDP Firewall Rule
+        run: Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
 
-      - run: Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' -name "UserAuthentication" -Value 1
+      - name: Disable Network Level Authentication (NLA)
+        # FIX 3: Mengubah ke Value 0 (Disable NLA)
+        # Ini akan membuat koneksi RDP lebih mudah tanpa error NLA
+        run: Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' -name "UserAuthentication" -Value 0
 
-      - run: Set-LocalUser -Name "runneradmin" -Password (ConvertTo-SecureString -AsPlainText "P@ssword!" -Force)
+      - name: Set Password for Runner
+        # FIX 4: User default adalah "runner", bukan "runneradmin"
+        run: Set-LocalUser -Name "runner" -Password (ConvertTo-SecureString -AsPlainText "P@ssword!" -Force)
 
       - name: Create Tunnel
-        run: .\ngrok\ngrok.exe tcp 3389
+        # FIX 5: Path yang benar adalah .\ngrok.exe
+        run: .\ngrok.exe tcp 3389
